@@ -244,27 +244,61 @@ def is_good_friend_combination(piece1: ChessPiece, piece2: ChessPiece) -> bool:
     return combination in good_combinations or (combination[1], combination[0]) in good_combinations
 
 def analyze_state(pieces: List[ChessPiece]) -> str:
-    """分析呈現狀態"""
+    """分析呈現狀態，結合中心棋子與周圍棋子的影響，提供更動態的解讀。"""
     center_piece = pieces[0]
-    
+    surrounding_pieces = pieces[1:]
+
+    # 核心狀態描述
     state_descriptions = {
-        PieceType.GENERAL: "具有領導能力和影響力，喜歡指揮他人，但可能過於固執，需要學會傾聽他人意見",
-        PieceType.ADVISOR: "智慧能力佳，善於助人，有指揮與發令的氣勢，但可能過於多慮，有時會忽略親近的人",
-        PieceType.ELEPHANT: "工作能力佳但較被動，喜歡靜坐而言勝過於起而行，需要他人協助才能發揮潛力",
-        PieceType.CHARIOT: "積極進取，敢於冒險，有主觀想法，但需注意過於衝動，不願受約束可能導致衝突",
-        PieceType.HORSE: "勤奮努力，富有創意，有浪漫想法，但方向可能不定，心太軟容易管閒事",
-        PieceType.CANNON: "想要突破現狀，有浪漫想法，但容易不穩定，風險較高，容易恐懼和取巧",
-        PieceType.SOLDIER: "做事踏實穩重，一步一腳印，重視現實和日常，但可能想太多，行動力較弱"
+        PieceType.GENERAL: "您目前的核心狀態展現出「帥」的特質：具有領導能力和影響力，喜歡指揮他人，但可能過於固執，需要學會傾聽他人意見",
+        PieceType.ADVISOR: "您目前的核心狀態展現出「仕」的特質：智慧能力佳，善於輔佐，有指揮與發令的氣勢，但可能過於多慮，有時會忽略親近的人",
+        PieceType.ELEPHANT: "您目前的核心狀態展現出「相」的特質：工作能力佳但較為被動，喜歡靜坐而言勝過於起而行，需要他人協助才能發揮潛力",
+        PieceType.CHARIOT: "您目前的核心狀態展現出「俥」的特質：充滿積極進取的能量，敢於冒險，有強烈的主觀想法，但需注意過於衝動，不願受約束可能導致衝突",
+        PieceType.HORSE: "您目前的核心狀態展現出「傌」的特質：勤奮努力且富有創意，有許多浪漫的想法，但方向可能不定，心太軟容易管閒事",
+        PieceType.CANNON: "您目前的核心狀態展現出「炮」的特質：內心渴望突破現狀，充滿變動的能量，但這也可能帶來不穩定與風險，容易感到恐懼或尋求取巧",
+        PieceType.SOLDIER: "您目前的核心狀態展現出「兵」的特質：做事踏實穩重，一步一腳印，重視現實和日常，但可能想太多，行動力較弱"
     }
-    
+
+    # 周圍棋子的影響描述 (同色, 異色)
+    influence_descriptions = {
+        PieceType.GENERAL: ("一股強大的領導力量在支持您", "一股不同的主導意見在影響您"),
+        PieceType.ADVISOR: ("一份來自智囊的輔佐與支持", "一個需要您運用智慧去應對的建議"),
+        PieceType.ELEPHANT: ("一股穩固的防守與支持力量", "一個提醒您需要穩固根基的信號"),
+        PieceType.CHARIOT: ("一股強勁的行動力與衝勁", "一個來自外界的直接挑戰或衝擊"),
+        PieceType.HORSE: ("一份靈活的創意與助力", "一個帶來變數與不確定性的因素"),
+        PieceType.CANNON: ("一股突破性的變革能量", "一個潛在的衝突或需要跳躍式思維解決的問題"),
+        PieceType.SOLDIER: ("一份務實肯幹的支持", "一個提醒您需要腳踏實地的聲音")
+    }
+
+    # 1. 取得核心狀態描述
     base_description = state_descriptions.get(center_piece.piece_type, "狀態分析中...")
-    
+
+    # 2. 根據中心棋子顏色判斷主要傾向
     if center_piece.color == Color.RED:
-        color_trait = "外在表現較為積極主動，容易被他人看好"
+        color_trait = "您的外在表現較為積極主動，容易被他人看見與認可"
     else:
-        color_trait = "內在力量較強，但外在表現可能較為內斂"
-    
-    return f"{base_description}。{color_trait}。"
+        color_trait = "您的內在力量較強，但外在表現可能較為內斂，謀定而後動"
+
+    # 3. 分析周圍棋子的影響
+    influence_texts = []
+    for piece in surrounding_pieces:
+        same_color_text, diff_color_text = influence_descriptions.get(
+            piece.piece_type, ("一股未知的力量", "一股未知的力量")
+        )
+        
+        if piece.color == center_piece.color:
+            influence_texts.append(f"來自（{piece.display_name}）的{same_color_text}")
+        else:
+            influence_texts.append(f"來自（{piece.display_name}）的{diff_color_text}")
+
+    # 4. 組合完整的分析文本
+    full_analysis = [f"{base_description}，{color_trait}。"]
+    if influence_texts:
+        full_analysis.append("\n在您周圍，同時存在著以下幾種力量：")
+        for text in influence_texts:
+            full_analysis.append(f"- {text}。")
+
+    return "\n".join(full_analysis)
 
 def analyze_interaction(pieces: List[ChessPiece]) -> str:
     """分析互動關係"""
@@ -470,22 +504,47 @@ def generate_suggestions(pieces: List[ChessPiece], patterns: List[str], yin_yang
     if "好朋友格" in patterns:
         suggestions.append("人際關係良好，有互助的朋友，建議珍惜友誼，互相扶持")
     
-    # 根據中間棋子給出具體建議
+    # 根據中間棋子和組合給出具體建議
     center_piece = pieces[0]
+    piece_types_in_selection = {p.piece_type for p in pieces}
+
     if center_piece.piece_type == PieceType.GENERAL:
-        suggestions.append("具有領導才能，建議培養包容心，學會授權，避免事必躬親")
+        suggestion = "具有領導才能，建議培養包容心，學會授權，避免事必躬親。"
+        if PieceType.CHARIOT in piece_types_in_selection and center_piece.piece_type != PieceType.CHARIOT:
+            suggestion += " 結合（俥/車）的行動力，您的領導將更具執行效率。"
+        if PieceType.ADVISOR in piece_types_in_selection and center_piece.piece_type != PieceType.ADVISOR:
+            suggestion += " 善用（仕/士）的智慧，您的決策會更加周全。"
+        suggestions.append(suggestion)
     elif center_piece.piece_type == PieceType.ADVISOR:
-        suggestions.append("智慧能力強，建議多關心身邊親近的人，平衡工作與家庭")
+        suggestion = "智慧能力強，建議多關心身邊親近的人，平衡工作與家庭。"
+        if PieceType.GENERAL in piece_types_in_selection and center_piece.piece_type != PieceType.GENERAL:
+            suggestion += " 當前是您發揮輔佐才能，協助領導者（帥/將）的絕佳時機。"
+        suggestions.append(suggestion)
     elif center_piece.piece_type == PieceType.ELEPHANT:
-        suggestions.append("需要提高行動力，建議設定明確目標，主動出擊，不要只是等待")
+        suggestion = "需要提高行動力，建議設定明確目標，主動出擊，不要只是等待。"
+        if PieceType.SOLDIER in piece_types_in_selection and center_piece.piece_type != PieceType.SOLDIER:
+            suggestion += " 結合（兵/卒）的穩健，您的行動將會更加踏實可靠。"
+        suggestions.append(suggestion)
     elif center_piece.piece_type == PieceType.CHARIOT:
-        suggestions.append("行動力強但需要方向，建議制定詳細計劃，避免盲目衝動")
+        suggestion = "行動力強但需要方向，建議制定詳細計劃，避免盲目衝動。"
+        if PieceType.HORSE in piece_types_in_selection and center_piece.piece_type != PieceType.HORSE:
+            suggestion += " 搭配（傌/馬）的靈活，能讓您在衝刺時找到更多可能性。"
+        suggestions.append(suggestion)
     elif center_piece.piece_type == PieceType.HORSE:
-        suggestions.append("富有創意但方向不定，建議專注一個領域深耕，避免三心二意")
+        suggestion = "富有創意但方向不定，建議專注一個領域深耕，避免三心二意。"
+        if PieceType.CANNON in piece_types_in_selection and center_piece.piece_type != PieceType.CANNON:
+            suggestion += " 若能將創意與（炮/包）的突破力結合，將有驚人成果。"
+        suggestions.append(suggestion)
     elif center_piece.piece_type == PieceType.CANNON:
-        suggestions.append("想要突破但風險高，建議穩中求進，做好風險評估再行動")
+        suggestion = "想要突破但風險高，建議穩中求進，做好風險評估再行動。"
+        if PieceType.SOLDIER in piece_types_in_selection and center_piece.piece_type != PieceType.SOLDIER:
+            suggestion += " 奠基於（兵/卒）的穩固基礎上進行突破，成功率會更高。"
+        suggestions.append(suggestion)
     elif center_piece.piece_type == PieceType.SOLDIER:
-        suggestions.append("踏實穩重是優點，建議適度冒險，抓住機會提升自己")
+        suggestion = "踏實穩重是優點，建議適度冒險，抓住機會提升自己。"
+        if PieceType.CHARIOT in piece_types_in_selection and center_piece.piece_type != PieceType.CHARIOT:
+            suggestion += " 藉助（俥/車）的衝勁，能幫助您跨出舒適圈，迎接新挑戰。"
+        suggestions.append(suggestion)
     
     # 健康相關建議
     wu_xing_count = {}
@@ -506,4 +565,3 @@ def generate_suggestions(pieces: List[ChessPiece], patterns: List[str], yin_yang
         suggestions.append("多與不同類型的人交流，擴展視野，增加人生閱歷")
     
     return suggestions
-
