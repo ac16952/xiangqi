@@ -1,2 +1,2 @@
-streamlit>=1.48.0
-
+Flask>=2.0.0
+Flask-Cors>=3.0.0
